@@ -1,5 +1,5 @@
 import './App.css';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 
@@ -15,12 +15,12 @@ function App() {
         "2_1": "#",
         "2_2": "#",
     });
-    const [login, setLogin] = useState(null);
-    const [gameId, setGameId] = useState(null);
+    const [login, setLogin] = useState('');
+    const [gameId, setGameId] = useState('');
     const [gameOn, setGameOn] = useState(false);
     const [playerType, setPlayerType] = useState(null);
 
-    let turns = [["#", "#", "#"], ["#", "#", "#"], ["#", "#", "#"]];
+    const [turns, setTurns] = useState([["#", "#", "#"], ["#", "#", "#"], ["#", "#", "#"]]);
     let turn = "";
 
     const url = 'http://localhost:8080';
@@ -55,7 +55,7 @@ function App() {
                 .then(data => {
                     setGameId(data.gameId);
                     setPlayerType('O');
-                    turns = [["#", "#", "#"], ["#", "#", "#"], ["#", "#", "#"]];
+                    // turns = [["#", "#", "#"], ["#", "#", "#"], ["#", "#", "#"]];
                     connectToSocket(gameId);
                     alert("Congrats you're playing with: " + data.player1.login);
                     setGameOn(true);
@@ -77,7 +77,7 @@ function App() {
                 .then(data => {
                     setGameId(data.gameId);
                     setPlayerType('X');
-                    turns = [["#", "#", "#"], ["#", "#", "#"], ["#", "#", "#"]];
+                    // turns = [["#", "#", "#"], ["#", "#", "#"], ["#", "#", "#"]];
                     connectToSocket(gameId);
                     alert("Your created a game. Game id is: " + data.gameId);
                     setGameOn(true);
@@ -99,7 +99,7 @@ function App() {
         }).then(res => res.json())
             .then(data => {
                 setPlayerType('O');
-                turns = [["#", "#", "#"], ["#", "#", "#"], ["#", "#", "#"]];
+                // turns = [["#", "#", "#"], ["#", "#", "#"], ["#", "#", "#"]];
                 connectToSocket(gameId);
                 alert("Congrats you're playing with: " + data.player1.login);
                 setGameOn(true);
@@ -121,6 +121,7 @@ function App() {
             })
         }).then(response => response.json())
             .then(jsonData => {
+                console.log(jsonData);
                 setGameOn(false);
                 displayResponse(jsonData.result);
             }).catch(err => console.error(err));
@@ -136,7 +137,14 @@ function App() {
                     turns[i][j] = 'O';
                 }
                 let id = i + "_" + j;
+                setTurns([...turns]);
                 tick[id] = turns[i][j];
+                setTick({
+                    ...tick
+                });
+
+                console.log('tick', tick);
+                console.log('turns', turns);
             }
         }
         if (data.winner != null) {
@@ -168,32 +176,32 @@ function App() {
 
     return (
         <div className="App" id="box">
-            <header>
-                <h1>Play Tic Tac Toe</h1>
-            </header>
-            <input onChange={handleLoginChange} value={login} id="login" placeholder="Place a login here"/>
-            <button onClick={create_game}>Create a new game</button>
-            <button onClick={connectToRandom}>Connect to random game</button>
-            <input onChange={handleGameIdChange} value={gameId} id="game_id" placeholder="Paste game id"/>
-            <button onClick={handleConnectToGame}>Connect by game id</button>
-            <div id="message"></div>
-            <ul id="gameBoard">
-                <li id="0_0" value={tick["0_0"]} className="tic" onClick={ticClickHandler}>{tick["0_0"]  === '#' ? '' : tick["0_0"]}</li>
-                <li id="0_1" value={tick["0_1"]} className="tic" onClick={ticClickHandler}>{tick["0_1"]  === '#' ? '' : tick["0_1"]}</li>
-                <li id="0_2" value={tick["0_2"]} className="tic" onClick={ticClickHandler}>{tick["0_2"]  === '#' ? '' : tick["0_2"]}</li>
-                <li id="1_0" value={tick["1_0"]} className="tic" onClick={ticClickHandler}>{tick["1_0"]  === '#' ? '' : tick["1_0"]}</li>
-                <li id="1_1" value={tick["1_1"]} className="tic" onClick={ticClickHandler}>{tick["1_1"]  === '#' ? '' : tick["1_1"]}</li>
-                <li id="1_2" value={tick["1_2"]} className="tic" onClick={ticClickHandler}>{tick["1_2"]  === '#' ? '' : tick["1_2"]}</li>
-                <li id="2_0" value={tick["2_0"]} className="tic" onClick={ticClickHandler}>{tick["2_0"]  === '#' ? '' : tick["2_0"]}</li>
-                <li id="2_1" value={tick["2_1"]} className="tic" onClick={ticClickHandler}>{tick["2_1"]  === '#' ? '' : tick["2_1"]}</li>
-                <li id="2_2" value={tick["2_2"]} className="tic" onClick={ticClickHandler}>{tick["2_2"]  === '#' ? '' : tick["2_2"]}</li>
-            </ul>
-            <div className="clearfix"></div>
-            <footer>
-                <span>You are playing with <span id="oponentLogin"></span></span>
-            </footer>
-        </div>
-    );
+        <header>
+        <h1>Play Tic Tac Toe</h1>
+    </header>
+    <input onChange={handleLoginChange} value={login} id="login" placeholder="Place a login here"/>
+        <button onClick={create_game}>Create a new game</button>
+    <button onClick={connectToRandom}>Connect to random game</button>
+    <input onChange={handleGameIdChange} value={gameId} id="game_id" placeholder="Paste game id"/>
+        <button onClick={handleConnectToGame}>Connect by game id</button>
+    <div id="message"></div>
+        <ul id="gameBoard">
+        <li id="0_0" value={tick["0_0"]} className="tic" onClick={ticClickHandler}>{tick["0_0"]  === '#' ? '' : tick["0_0"]}</li>
+        <li id="0_1" value={tick["0_1"]} className="tic" onClick={ticClickHandler}>{tick["0_1"]  === '#' ? '' : tick["0_1"]}</li>
+        <li id="0_2" value={tick["0_2"]} className="tic" onClick={ticClickHandler}>{tick["0_2"]  === '#' ? '' : tick["0_2"]}</li>
+        <li id="1_0" value={tick["1_0"]} className="tic" onClick={ticClickHandler}>{tick["1_0"]  === '#' ? '' : tick["1_0"]}</li>
+        <li id="1_1" value={tick["1_1"]} className="tic" onClick={ticClickHandler}>{tick["1_1"]  === '#' ? '' : tick["1_1"]}</li>
+        <li id="1_2" value={tick["1_2"]} className="tic" onClick={ticClickHandler}>{tick["1_2"]  === '#' ? '' : tick["1_2"]}</li>
+        <li id="2_0" value={tick["2_0"]} className="tic" onClick={ticClickHandler}>{tick["2_0"]  === '#' ? '' : tick["2_0"]}</li>
+        <li id="2_1" value={tick["2_1"]} className="tic" onClick={ticClickHandler}>{tick["2_1"]  === '#' ? '' : tick["2_1"]}</li>
+        <li id="2_2" value={tick["2_2"]} className="tic" onClick={ticClickHandler}>{tick["2_2"]  === '#' ? '' : tick["2_2"]}</li>
+        </ul>
+        <div className="clearfix"></div>
+        <footer>
+        <span>You are playing with <span id="oponentLogin"></span></span>
+    </footer>
+    </div>
+);
 }
 
 export default App;
